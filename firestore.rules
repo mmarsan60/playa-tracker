@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /competitions/{leagueId} {
+      allow read, create, update: if isValidLeagueId(leagueId) && isValidCompetition();
+      allow delete: if false;
+
+      match /days/{dayId} {
+        allow read, create, update: if isValidLeagueId(leagueId) && isValidDayId(dayId);
+        allow delete: if false;
+      }
+    }
+  }
+
+  function isValidLeagueId(leagueId) {
+    return leagueId.matches('^[a-zA-Z0-9_-]{12,80}$');
+  }
+
+  function isValidDayId(dayId) {
+    return dayId.matches('^\\d{4}-\\d{2}-\\d{2}$');
+  }
+
+  function isValidCompetition() {
+    return request.resource.data.keys().hasOnly([
+      'startDate', 'endDate', 'morningCutoff', 'players', 'createdAt', 'updatedAt'
+    ]);
+  }
+}

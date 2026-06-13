@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ranking playero · Verano 2026</title>
+  <meta name="description" content="Tracker privado por enlace para sumar puntos de playa por mañana y tarde." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏖️%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Verano 2026</p>
+        <h1>Ranking playero</h1>
+        <p class="subtitle">1 punto por playa de mañana y 1 punto por playa de tarde. La mañana cuenta hasta la hora de corte configurada.</p>
+      </div>
+      <div class="hero-actions">
+        <button id="copyLinkBtn" class="button button-secondary" type="button">Copiar enlace privado</button>
+        <button id="exportBtn" class="button button-secondary" type="button">Exportar CSV</button>
+        <button id="settingsBtn" class="button" type="button">Ajustes</button>
+      </div>
+    </header>
+
+    <section id="setupWarning" class="setup-warning hidden" aria-live="polite"></section>
+
+    <main>
+      <section class="scoreboard" aria-label="Resumen de puntos">
+        <article class="leader-card">
+          <span class="label">Va ganando</span>
+          <strong id="leaderName">—</strong>
+          <span id="leaderDetail">Todavía no hay puntos.</span>
+        </article>
+        <div id="playerCards" class="player-cards"></div>
+      </section>
+
+      <section class="panel quick-panel">
+        <div>
+          <h2>Registrar hoy</h2>
+          <p id="todayLabel" class="muted">—</p>
+        </div>
+        <div id="todayControls" class="today-controls"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <h2>Calendario</h2>
+            <p id="rangeLabel" class="muted">—</p>
+          </div>
+          <div class="legend">
+            <span><i class="dot morning"></i>Mañana</span>
+            <span><i class="dot afternoon"></i>Tarde</span>
+          </div>
+        </div>
+        <div id="calendar" class="calendar" aria-live="polite"></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="settingsDialog" class="settings-dialog">
+    <form method="dialog" id="settingsForm">
+      <div class="dialog-header">
+        <h2>Ajustes</h2>
+        <button class="icon-button" value="cancel" aria-label="Cerrar">×</button>
+      </div>
+
+      <label>
+        Nombre jugador/a 1
+        <input id="playerOneName" name="playerOneName" autocomplete="off" maxlength="24" />
+      </label>
+
+      <label>
+        Nombre jugador/a 2
+        <input id="playerTwoName" name="playerTwoName" autocomplete="off" maxlength="24" />
+      </label>
+
+      <div class="two-cols">
+        <label>
+          Inicio
+          <input id="startDate" name="startDate" type="date" />
+        </label>
+        <label>
+          Final
+          <input id="endDate" name="endDate" type="date" />
+        </label>
+      </div>
+
+      <label>
+        Hora límite para punto de mañana
+        <input id="morningCutoff" name="morningCutoff" type="time" />
+      </label>
+
+      <p class="small-note">Privacidad por enlace: cualquiera que tenga la URL de esta liga puede verla y editarla. Para seguridad real haría falta login.</p>
+
+      <menu>
+        <button class="button button-secondary" value="cancel" type="button" id="cancelSettingsBtn">Cancelar</button>
+        <button class="button" value="default" type="submit">Guardar ajustes</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
