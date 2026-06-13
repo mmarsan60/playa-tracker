@@ -265,7 +265,7 @@ function bindEvents() {
   els.settingsBtn.addEventListener("click", () => {
     const [p1, p2] = state.settings.players;
     els.playerOneName.value = p1?.name || "María";
-    els.playerTwoName.value = p2?.name || "Amigo";
+    els.playerTwoName.value = p2?.name || "Pablo";
     els.startDate.value = state.settings.startDate;
     els.endDate.value = state.settings.endDate;
     els.morningCutoff.value = state.settings.morningCutoff;
@@ -282,7 +282,7 @@ function bindEvents() {
       morningCutoff: els.morningCutoff.value || "13:00",
       players: [
         { id: "maria", name: cleanName(els.playerOneName.value, "María") },
-        { id: "amigo", name: cleanName(els.playerTwoName.value, "Amigo") }
+        { id: "pablo", name: cleanName(els.playerTwoName.value, "Pablo") }
       ]
     };
 
@@ -396,8 +396,8 @@ function normalizeSettings(data) {
     morningCutoff: data.morningCutoff || APP_OPTIONS.morningCutoff,
     players: Array.isArray(data.players) && data.players.length >= 2
       ? data.players.slice(0, 2).map((player, index) => ({
-          id: index === 0 ? "maria" : "amigo",
-          name: cleanName(player.name, index === 0 ? "María" : "Amigo")
+          id: index === 0 ? "maria" : "pablo",
+          name: cleanName(player.name, index === 0 ? "María" : "Pablo")
         }))
       : APP_OPTIONS.defaultPlayers
   };
