@@ -5,7 +5,7 @@ Web privada por enlace para registrar quién va más a la playa. Suma:
 - 1 punto si vas por la mañana.
 - 1 punto si vas por la tarde.
 - Por defecto, la mañana cuenta hasta las 13:00.
-- Rango inicial: 15 de junio de 2026 a 30 de septiembre de 2026.
+- Rango inicial: 15 de junio de 2026 a 6 de septiembre de 2026.
 
 ## Qué incluye
 
@@ -64,8 +64,8 @@ En `firebase-config.js` puedes cambiar los valores iniciales:
 
 ```js
 startDate: "2026-06-15",
-endDate: "2026-09-30",
+endDate: "2026-09-06",
 morningCutoff: "13:00"
 ```
 
-También puedes cambiar los nombres desde el botón **Ajustes** dentro de la web.
+También puedes cambiar los nombres desde el botón **Ajustes** dentro de la web. Por defecto, el segundo jugador es Pablo.
