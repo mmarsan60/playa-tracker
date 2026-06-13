@@ -4,12 +4,13 @@
 // 4) Sube el proyecto a GitHub Pages.
 
 export const firebaseConfig = {
-  apiKey: "PEGA_AQUI_TU_API_KEY",
-  authDomain: "PEGA_AQUI.firebaseapp.com",
-  projectId: "PEGA_AQUI",
-  storageBucket: "PEGA_AQUI.appspot.com",
-  messagingSenderId: "PEGA_AQUI",
-  appId: "PEGA_AQUI"
+    apiKey: "AIzaSyBuAeTWBnst8bROs7xi3MM6ZOfRR2wHIdc",
+    authDomain: "playa-tracker-web.firebaseapp.com",
+    projectId: "playa-tracker-web",
+    storageBucket: "playa-tracker-web.firebasestorage.app",
+    messagingSenderId: "548514812929",
+    appId: "1:548514812929:web:b25bf0f7f034b16f1f5c00",
+    measurementId: "G-BWM4QMLB3Q"
 };
 
 export const APP_OPTIONS = {
