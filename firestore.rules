@@ -2,11 +2,13 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /competitions/{leagueId} {
-      allow read, create, update: if isValidLeagueId(leagueId) && isValidCompetition();
+      allow read: if isValidLeagueId(leagueId);
+      allow create, update: if isValidLeagueId(leagueId) && isValidCompetition();
       allow delete: if false;
 
       match /days/{dayId} {
-        allow read, create, update: if isValidLeagueId(leagueId) && isValidDayId(dayId);
+        allow read: if isValidLeagueId(leagueId) && isValidDayId(dayId);
+        allow create, update: if isValidLeagueId(leagueId) && isValidDayId(dayId);
         allow delete: if false;
       }
     }
@@ -17,7 +19,7 @@ service cloud.firestore {
   }
 
   function isValidDayId(dayId) {
-    return dayId.matches('^\\d{4}-\\d{2}-\\d{2}$');
+    return dayId.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
   }
 
   function isValidCompetition() {

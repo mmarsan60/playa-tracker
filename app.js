@@ -6,22 +6,32 @@ import {
   getDoc,
   setDoc,
   onSnapshot,
-  collection,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const EFFECTIVE_OPTIONS = {
+  ...APP_OPTIONS,
+  startDate: "2026-06-15",
+  endDate: "2026-09-06",
+  morningCutoff: EFFECTIVE_OPTIONS.morningCutoff || "13:00",
+  defaultPlayers: [
+    { id: "maria", name: "María" },
+    { id: "amigo", name: "Pablo" }
+  ]
+};
 
 const state = {
   db: null,
   leagueId: "",
   settings: {
-    startDate: APP_OPTIONS.startDate,
-    endDate: APP_OPTIONS.endDate,
-    morningCutoff: APP_OPTIONS.morningCutoff,
-    players: APP_OPTIONS.defaultPlayers
+    startDate: EFFECTIVE_OPTIONS.startDate,
+    endDate: EFFECTIVE_OPTIONS.endDate,
+    morningCutoff: EFFECTIVE_OPTIONS.morningCutoff,
+    players: EFFECTIVE_OPTIONS.defaultPlayers
   },
   days: new Map(),
   unsubscribeCompetition: null,
-  unsubscribeDays: null,
+  dayUnsubscribers: [],
   usingLocalMode: false
 };
 
@@ -63,7 +73,7 @@ function getLeagueIdFromUrl() {
   const existing = url.searchParams.get("liga");
   if (existing && /^[a-zA-Z0-9_-]{12,80}$/.test(existing)) return existing;
 
-  const fallback = APP_OPTIONS.defaultLeagueId || generateLeagueId();
+  const fallback = EFFECTIVE_OPTIONS.defaultLeagueId || generateLeagueId();
   url.searchParams.set("liga", fallback);
   window.history.replaceState({}, "", url.toString());
   return fallback;
@@ -282,7 +292,7 @@ function bindEvents() {
       morningCutoff: els.morningCutoff.value || "13:00",
       players: [
         { id: "maria", name: cleanName(els.playerOneName.value, "María") },
-        { id: "pablo", name: cleanName(els.playerTwoName.value, "Pablo") }
+        { id: "amigo", name: cleanName(els.playerTwoName.value, "Pablo") }
       ]
     };
 
@@ -314,18 +324,41 @@ async function init() {
   state.db = getFirestore(app);
   await ensureCompetitionExists();
   subscribeToCompetition();
-  subscribeToDays();
 }
 
 async function ensureCompetitionExists() {
   const ref = doc(state.db, "competitions", state.leagueId);
   const snap = await getDoc(ref);
+
+  const desiredSettings = {
+    startDate: EFFECTIVE_OPTIONS.startDate,
+    endDate: EFFECTIVE_OPTIONS.endDate,
+    morningCutoff: EFFECTIVE_OPTIONS.morningCutoff,
+    players: EFFECTIVE_OPTIONS.defaultPlayers
+  };
+
   if (!snap.exists()) {
     await setDoc(ref, {
-      ...state.settings,
+      ...desiredSettings,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
+    return;
+  }
+
+  // Migración suave para la liga que ya estaba creada con "Amigo" y septiembre completo.
+  // Así cambiar app.js sí actualiza también el documento ya guardado en Firebase.
+  const data = snap.data();
+  const needsMigration =
+    data.startDate !== desiredSettings.startDate ||
+    data.endDate !== desiredSettings.endDate ||
+    data.players?.[1]?.name !== "Pablo";
+
+  if (needsMigration) {
+    await setDoc(ref, {
+      ...desiredSettings,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
   }
 }
 
@@ -335,18 +368,31 @@ function subscribeToCompetition() {
   state.unsubscribeCompetition = onSnapshot(ref, (snap) => {
     if (!snap.exists()) return;
     state.settings = normalizeSettings(snap.data());
+    subscribeToDaysForCurrentRange();
     renderAll();
   }, (error) => showToast(`Error leyendo ajustes: ${error.message}`));
 }
 
-function subscribeToDays() {
-  const ref = collection(state.db, "competitions", state.leagueId, "days");
-  state.unsubscribeDays?.();
-  state.unsubscribeDays = onSnapshot(ref, (snapshot) => {
-    state.days.clear();
-    snapshot.forEach(dayDoc => state.days.set(dayDoc.id, dayDoc.data()));
-    renderAll();
-  }, (error) => showToast(`Error leyendo días: ${error.message}`));
+function subscribeToDaysForCurrentRange() {
+  state.dayUnsubscribers.forEach(unsubscribe => unsubscribe());
+  state.dayUnsubscribers = [];
+  state.days.clear();
+
+  const dates = getDatesInRange(state.settings.startDate, state.settings.endDate);
+
+  for (const dateString of dates) {
+    const ref = doc(state.db, "competitions", state.leagueId, "days", dateString);
+    const unsubscribe = onSnapshot(ref, (snap) => {
+      if (snap.exists()) {
+        state.days.set(dateString, snap.data());
+      } else {
+        state.days.delete(dateString);
+      }
+      renderAll();
+    }, (error) => showToast(`Error leyendo el día ${dateString}: ${error.message}`));
+
+    state.dayUnsubscribers.push(unsubscribe);
+  }
 }
 
 async function saveSession(dateString, playerId, session, value) {
@@ -391,15 +437,15 @@ async function saveSettings(updatedSettings) {
 
 function normalizeSettings(data) {
   return {
-    startDate: data.startDate || APP_OPTIONS.startDate,
-    endDate: data.endDate || APP_OPTIONS.endDate,
-    morningCutoff: data.morningCutoff || APP_OPTIONS.morningCutoff,
+    startDate: data.startDate || EFFECTIVE_OPTIONS.startDate,
+    endDate: data.endDate || EFFECTIVE_OPTIONS.endDate,
+    morningCutoff: data.morningCutoff || EFFECTIVE_OPTIONS.morningCutoff,
     players: Array.isArray(data.players) && data.players.length >= 2
       ? data.players.slice(0, 2).map((player, index) => ({
-          id: index === 0 ? "maria" : "pablo",
+          id: index === 0 ? "maria" : "amigo",
           name: cleanName(player.name, index === 0 ? "María" : "Pablo")
         }))
-      : APP_OPTIONS.defaultPlayers
+      : EFFECTIVE_OPTIONS.defaultPlayers
   };
 }
 
