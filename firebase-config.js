@@ -16,10 +16,10 @@ export const firebaseConfig = {
 export const APP_OPTIONS = {
   defaultLeagueId: "",
   startDate: "2026-06-15",
-  endDate: "2026-09-06",
+  endDate: "2026-09-30",
   morningCutoff: "13:00",
   defaultPlayers: [
     { id: "maria", name: "María" },
-    { id: "pablo", name: "Pablo" }
+    { id: "amigo", name: "Amigo" }
   ]
 };
