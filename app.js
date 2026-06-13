@@ -9,15 +9,22 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
+const DEFAULT_PLAYERS = [
+  { id: "maria", name: "María" },
+  { id: "amigo", name: "Pablo" }
+];
+
 const EFFECTIVE_OPTIONS = {
   ...APP_OPTIONS,
-  startDate: "2026-06-15",
-  endDate: "2026-09-06",
-  morningCutoff: EFFECTIVE_OPTIONS.morningCutoff || "13:00",
-  defaultPlayers: [
-    { id: "maria", name: "María" },
-    { id: "amigo", name: "Pablo" }
-  ]
+  startDate: APP_OPTIONS.startDate || "2026-06-15",
+  endDate: APP_OPTIONS.endDate || "2026-09-06",
+  morningCutoff: APP_OPTIONS.morningCutoff || "13:00",
+  defaultPlayers: Array.isArray(APP_OPTIONS.defaultPlayers) && APP_OPTIONS.defaultPlayers.length >= 2
+    ? APP_OPTIONS.defaultPlayers.slice(0, 2).map((player, index) => ({
+        id: index === 0 ? "maria" : "amigo",
+        name: player.name || DEFAULT_PLAYERS[index].name
+      }))
+    : DEFAULT_PLAYERS
 };
 
 const state = {
